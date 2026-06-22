@@ -1,54 +1,26 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from PyPDF2 import PdfReader
-import os
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    jwt_required,
+    get_jwt_identity
+)
+
+from models import db, User, JobApplication
 
 app = Flask(__name__)
+
 CORS(app)
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///career_twin.db'
+app.config['JWT_SECRET_KEY'] = 'career_twin_secret'
 
-SKILLS = [
-    "python",
-    "java",
-    "sql",
-    "react",
-    "flask",
-    "django",
-    "javascript",
-    "c++"
-]
+db.init_app(app)
 
-@app.route("/")
-def home():
-    return {"message": "CareerTwin AI Backend Running"}
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 
-@app.route("/upload-resume", methods=["POST"])
-def upload_resume():
-    file = request.files["resume"]
-
-    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(filepath)
-
-    reader = PdfReader(filepath)
-
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text() or ""
-
-    found_skills = []
-
-    lower_text = text.lower()
-
-    for skill in SKILLS:
-        if skill in lower_text:
-            found_skills.append(skill)
-
-    return jsonify({
-        "skills": found_skills,
-        "skill_count": len(found_skills)
-    })
-
-if __name__ == "__main__":
-    app.run(debug=True)
+with app.app_context():
+    db.create_all()
