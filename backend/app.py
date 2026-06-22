@@ -24,3 +24,24 @@ jwt = JWTManager(app)
 
 with app.app_context():
     db.create_all()
+@app.route('/register', methods=['POST'])
+def register():
+
+    data = request.json
+
+    hashed_password = bcrypt.generate_password_hash(
+        data['password']
+    ).decode('utf-8')
+
+    user = User(
+        username=data['username'],
+        email=data['email'],
+        password=hashed_password
+    )
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({
+        "message": "User Registered Successfully"
+    })
