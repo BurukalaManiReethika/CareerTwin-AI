@@ -7,12 +7,6 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity
 )
-from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-    jwt_required,
-    get_jwt_identity
-)
 
 from models import db, User, JobApplication
 
@@ -30,6 +24,8 @@ jwt = JWTManager(app)
 
 with app.app_context():
     db.create_all()
+
+
 @app.route('/register', methods=['POST'])
 def register():
 
@@ -51,7 +47,9 @@ def register():
     return jsonify({
         "message": "User Registered Successfully"
     })
-    @app.route('/login', methods=['POST'])
+
+
+@app.route('/login', methods=['POST'])
 def login():
 
     data = request.json
@@ -62,36 +60,8 @@ def login():
 
     if not user:
         return jsonify({
-            "message": "User not found"
+            "message": "User Not Found"
         }), 404
-
-    if bcrypt.check_password_hash(
-        user.password,
-        data['password']
-    ):
-
-        access_token = create_access_token(
-            identity=user.id
-        )
-
-        return jsonify({
-            "token": access_token
-        })
-
-    return jsonify({
-        "message": "Invalid password"
-    }), 401
-    @app.route('/login', methods=['POST'])
-def login():
-
-    data = request.json
-
-    user = User.query.filter_by(
-        email=data['email']
-    ).first()
-
-    if not user:
-        return jsonify({"message": "User Not Found"}), 404
 
     if bcrypt.check_password_hash(
         user.password,
@@ -109,7 +79,9 @@ def login():
     return jsonify({
         "message": "Invalid Credentials"
     }), 401
-    @app.route('/add-job', methods=['POST'])
+
+
+@app.route('/add-job', methods=['POST'])
 @jwt_required()
 def add_job():
 
@@ -130,7 +102,9 @@ def add_job():
     return jsonify({
         "message": "Job Added"
     })
-    @app.route('/jobs')
+
+
+@app.route('/jobs')
 @jwt_required()
 def jobs():
 
@@ -150,20 +124,7 @@ def jobs():
         })
 
     return jsonify(results)
-    {
-  "username":"reethika",
-  "email":"reethika@gmail.com",
-  "password":"123456"
-}
-    {
-  "email":"reethika@gmail.com",
-  "password":"123456"
-}
-    {
-  "company":"Google",
-  "role":"Python Developer",
-  "status":"Applied"
-}
-app.config["JWT_SECRET_KEY"] = "career_twin_secret_key"
 
-jwt = JWTManager(app)
+
+if __name__ == "__main__":
+    app.run(debug=True)
